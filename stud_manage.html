@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Data Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #007bff, #ffffff);        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .search-group {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Manage Student Data</h1>
+
+        <div class="form-group">
+            <label for="studentName">Student Name</label>
+            <input type="text" id="studentName" placeholder="Enter student name">
+        </div>
+
+        <div class="form-group">
+            <label for="studentDepartment">Department</label>
+            <input type="text" id="studentDepartment" placeholder="Enter department">
+        </div>
+
+        <div class="form-group">
+            <label for="studentEnrollment">Enrollment No</label>
+            <input type="text" id="studentEnrollment" placeholder="Enter enrollment number">
+        </div>
+
+        <div class="form-group">
+            <label for="studentCourse">Course</label>
+            <input type="text" id="studentCourse" placeholder="Enter course">
+        </div>
+
+        <div class="form-group">
+            <label for="studentAttendance">Attendance</label>
+            <input type="text" id="studentAttendance" placeholder="Enter attendance">
+        </div>
+
+        <div class="form-group search-group">
+            <label for="searchEnrollment">Search by Enrollment No</label>
+            <input type="text" id="searchEnrollment" placeholder="Enter enrollment number to search">
+            <button id="searchStudentButton" onclick="searchStudent()">Search Student</button>
+        </div>
+
+        <div class="actions">
+            <button id="addStudentButton" onclick="addStudent()">Add Student</button> 
+            <button id="deleteStudentButton" onclick="deleteStudent()">Delete Student</button>
+            <span id="loadingIndicator" style="display:none;">Loading...</span> 
+        </div>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Enrollment No</th>
+                    <th>Course</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-4tvmQmC11OsoWAfQlpJwAsa9nQKsn0w",
+            authDomain: "udaan-68610.firebaseapp.com",
+            projectId: "udaan-68610",
+            storageBucket: "udaan-68610.appspot.com",
+            messagingSenderId: "375083836802",
+            appId: "1:375083836802:web:db46de9d3a3e2444461b9b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function addStudent() {
+            const name = document.getElementById('studentName').value;
+            const department = document.getElementById('studentDepartment').value;
+            const enrollment = document.getElementById('studentEnrollment').value;
+            const course = document.getElementById('studentCourse').value;
+            const attendance = document.getElementById('studentAttendance').value;
+
+            document.getElementById('addStudentButton').disabled = true;
+
+            addDoc(collection(db, 'student'), {
+                name: name,
+                department: department,
+                enrollment: enrollment,
+                course: course,
+                attendance: attendance
+            })
+            .then(() => {
+                alert('Student saved successfully!');
+                loadStudentData();
+            })
+            .catch((error) => {
+                console.error("Error saving document: ", error);
+                alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
+                document.getElementById('addStudentButton').disabled = false;
+            });
+        }
+
+        function deleteStudent() {
+            const enrollment = document.getElementById('studentEnrollment').value;
+
+            if (!enrollment) {
+                alert('Please enter an enrollment number to delete.');
+                return;
+            }
+
+            const studentCollection = collection(db, "student");
+            getDocs(studentCollection)
+                .then((snapshot) => {
+                    let docToDelete = null;
+
+                    snapshot.forEach((doc) => {
+                        if (doc.data().enrollment === enrollment) {
+                            docToDelete = doc.id;
+                        }
+                    });
+
+                    if (docToDelete) {
+                        deleteDoc(doc(db, "student", docToDelete))
+                            .then(() => {
+                                alert('Student deleted successfully!');
+                                loadStudentData(); 
+                            })
+                            .catch((error) => {
+                                console.error("Error deleting document: ", error);
+                                alert('An error occurred. Please try again.');
+                            });
+                    } else {
+                        alert('No student found with this enrollment number.');
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error finding document: ", error);
+                });
+        }
+
+        function loadStudentData() {
+            const tableBody = document.getElementById("studentTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = "";
+
+            const studentCollection = collection(db, "student");
+            getDocs(studentCollection).then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = data.name;
+                    row.insertCell(1).textContent = data.department;
+                    row.insertCell(2).textContent = data.enrollment;
+                    row.insertCell(3).textContent = data.course;
+                    row.insertCell(4).textContent = data.attendance;
+                });
+            }).catch((error) => {
+                console.error("Error loading student data:", error);
+            });
+        }
+
+        function searchStudent() {
+            const enrollment = document.getElementById('searchEnrollment').value;
+            const tableBody = document.getElementById("studentTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; 
+            const studentCollection = collection(db, "student");
+            const q = query(studentCollection, where("enrollment", "==", enrollment));
+
+            getDocs(q).then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    alert('No student found with this enrollment number.');
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = data.name;
+                    row.insertCell(1).textContent = data.department;
+                    row.insertCell(2).textContent = data.enrollment;
+                    row.insertCell(3).textContent = data.course;
+                    row.insertCell(4).textContent = data.attendance;
+                });
+            }).catch((error) => {
+                console.error("Error searching student data:", error);
+            });
+        }
+
+        window.addStudent = addStudent;
+        window.deleteStudent = deleteStudent;
+        window.searchStudent = searchStudent;
+        window.onload = loadStudentData;
+    </script>
+</body>
+</html>

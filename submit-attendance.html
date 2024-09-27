@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Attendance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #007bff, #ffffff);        }
+        h1 {
+            color: #007bff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            margin-bottom: 30px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        input[type="text"], input[type="date"], select {
+            padding: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Attendance</h1>
+        <p>Record and review attendance for your classes.</p>
+
+        <form id="attendance-form">
+            <label for="lecture">Select Lecture:</label>
+            <select id="lecture" name="lecture" required>
+                <option value="">--Select Lecture--</option>
+                <option value="Lecture 1">Lecture 1</option>
+                <option value="Lecture 2">Lecture 2</option>
+                <option value="Lecture 3">Lecture 3</option>
+            </select>
+
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Present</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list">
+                    <tr>
+                        <td>John Doe</td>
+                        <td><input type="checkbox" name="attendance" value="John Doe"></td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td><input type="checkbox" name="attendance" value="Jane Smith"></td>
+                    </tr>
+                    <tr>
+                        <td>Emily Johnson</td>
+                        <td><input type="checkbox" name="attendance" value="Emily Johnson"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button type="submit" class="submit-button">Submit Attendance</button>
+        </form>
+
+    </div>
+
+    <script>
+        document.getElementById('attendance-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const lecture = document.getElementById('lecture').value;
+            const date = document.getElementById('date').value;
+            const checkboxes = document.querySelectorAll('input[name="attendance"]:checked');
+            let presentStudents = [];
+
+            checkboxes.forEach((checkbox) => {
+                presentStudents.push(checkbox.value);
+            });
+
+            if (lecture && date) {
+                alert(`Attendance for ${lecture} on ${date} has been submitted.\nPresent students: ${presentStudents.join(', ')}`);
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        });
+    </script>
+</body>
+</html>

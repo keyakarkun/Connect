@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Community</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #007bff 40%, #f0f2f5 100%);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .announcement {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+        }
+        .announcement-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .announcement-content {
+            margin-bottom: 10px;
+        }
+        .timestamp {
+            color: gray;
+            font-size: 12px;
+        }
+        #notification-message {
+            display: none;
+            color: red;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            margin: 20px auto;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alumni Community</h1>
+
+        <div class="section">
+            <h2>Official Notices and Events</h2>
+            <div id="announcement-list">
+            </div>
+        </div>
+
+        <div id="notification-message">
+            You have a new announcement!
+        </div>
+
+        <button class="button" id="mark-as-read-btn">Mark All as Read</button>
+    </div>
+
+    <script>
+        const announcements = [
+            {
+                title: "Alumni Meet 2024",
+                content: "We are happy to announce the Alumni Meet for the year 2024. Save the date: 15th October 2024.",
+                timestamp: "2024-09-20 10:30 AM"
+            },
+            {
+                title: "Campus Recruitment Drive",
+                content: "Join the upcoming campus recruitment drive on 30th September. Please register in advance.",
+                timestamp: "2024-09-18 02:00 PM"
+            }
+        ];
+
+        function loadAnnouncements() {
+            const announcementList = document.getElementById('announcement-list');
+            announcementList.innerHTML = ''; 
+
+            announcements.forEach(announcement => {
+                const div = document.createElement('div');
+                div.classList.add('announcement');
+                div.innerHTML = `
+                    <div class="announcement-title">${announcement.title}</div>
+                    <div class="announcement-content">${announcement.content}</div>
+                    <div class="timestamp">${announcement.timestamp}</div>
+                `;
+                announcementList.appendChild(div);
+            });
+        }
+
+        loadAnnouncements();
+
+        setTimeout(() => {
+            document.title = "(1) Alumni Community";
+            document.getElementById('notification-message').style.display = 'block';
+        }, 5000); 
+
+        document.getElementById('mark-as-read-btn').addEventListener('click', () => {
+            document.title = "Alumni Community";
+            document.getElementById('notification-message').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

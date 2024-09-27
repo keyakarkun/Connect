@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #007bff, #ffffff);        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .section {
+            background-color: white;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #333;
+        }
+        .personal-info, .engagement, .networking, .professional-opps, .social-media {
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+        }
+        .faculty-list {
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #eaeaea;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Alumni Portal</h1>
+    </header>
+
+    <div class="container">
+        <div class="section personal-info">
+            <h2>Personal Information</h2>
+            <p><strong>Name:</strong> <span id="alumniName">Keya</span></p>
+            <p><strong>Email:</strong> <span id="alumniEmail">keya@gamil.com</span></p>
+            <p><strong>Graduation Year:</strong> <span id="alumniGradYear">2024</span></p>
+        </div>
+
+        <div class="section engagement">
+            <h2>Engagement with College</h2>
+            <p><strong>Latest Events Attended:</strong> <span id="eventsAttended">UDAAN Hackathon</span></p>
+            <button class="button" id="viewEventsButton">View Upcoming Events</button>
+        </div>
+
+        <div class="section networking">
+            <h2>Networking & Communication</h2>
+            <p><strong>Faculty Mentors:</strong></p>
+            <div id="facultyMentors" class="faculty-list">Loading...</div>
+            <p><strong>Students:</strong></p>
+
+            <table id="studentTable" style="display: none;"> 
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div id="studentList">Loading...</div> 
+            
+            <table id="studentTable" style="display: none;"> 
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            
+            <button class="button" id="messageFacultyButton">Message Faculty</button>
+            <button class="button" id="messageStudentButton">Message Student</button> 
+        </div>
+
+        <div class="section professional-opps">
+            <h2>Professional Opportunities</h2>
+            <p><strong>Job Openings:</strong> <span id="jobOpenings">Loading...</span></p>
+            <button class="button">Explore Opportunities</button>
+        </div>
+
+        <div class="section social-media">
+            <h2>Social Media Integration</h2>
+            <p><strong>Connect with Alumni on:</strong> <span id="socialLinks">Loading...</span></p>
+            <button class="button">Join LinkedIn Alumni Group</button>
+        </div>
+    </div>
+
+    <table id="studentTable" style="display: none;"> 
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="studentList">Loading...</div> 
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-4tvmQmC11OsoWAfQlpJwAsa9nQKsn0w",
+            authDomain: "udaan-68610.firebaseapp.com",
+            projectId: "udaan-68610",
+            storageBucket: "udaan-68610.appspot.com",
+            messagingSenderId: "375083836802",
+            appId: "1:375083836802:web:db46de9d3a3e2444461b9b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadAlumniData() {
+            const alumniQuery = query(collection(db, "student"), where("isAlumni", "==", true));
+            const querySnapshot = await getDocs(alumniQuery);
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                document.getElementById('alumniName').innerText = data.name;
+                document.getElementById('alumniEmail').innerText = data.email;
+                document.getElementById('alumniGradYear').innerText = data.graduationYear;
+                document.getElementById('eventsAttended').innerText = data.eventsAttended || 'No recent events';
+            });
+        }
+
+        async function loadFacultyMentors() {
+            const facultySnapshot = await getDocs(collection(db, "faculty"));
+            let facultyList = '';
+            facultySnapshot.forEach((doc) => {
+                const data = doc.data();
+                facultyList += `<p>${data.name} - ${data.subject}</p>`;
+            });
+            document.getElementById('facultyMentors').innerHTML = facultyList || 'No faculty mentors available';
+
+            await loadStudents(); 
+        }
+
+        async function loadStudents() {
+            try {
+                const studentsSnapshot = await getDocs(collection(db, "student"));
+                let studentList = '';
+                studentsSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log(data);  
+                    if (data.name && data.department) { 
+                        studentList += `<p>${data.name} - ${data.department}</p>`; 
+                    } else {
+                        console.log('Missing name or department in document: ', doc.id);
+                    }
+                });
+                document.getElementById('studentList').innerHTML = studentList || 'No students available';
+            } catch (error) {
+                console.error("Error loading students:", error);
+            }
+        }
+
+        async function loadStudentData() {
+            const tableBody = document.getElementById("studentTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; 
+
+            try {
+                const studentCollection = collection(db, "students"); 
+                const querySnapshot = await getDocs(studentCollection);
+                
+                if (querySnapshot.empty) {
+                    document.getElementById('studentList').innerHTML = 'No students available'; 
+                    document.getElementById('studentTable').style.display = 'none'; 
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log("Document ID:", doc.id, "Data:", data); 
+                    
+                    if (data.name && data.department) {  
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).textContent = data.name;        
+                        row.insertCell(1).textContent = data.department;  
+                    } else {
+                        console.warn(`Document ${doc.id} is missing 'name' or 'department' fields`);
+                    }
+                });
+
+                document.getElementById('studentTable').style.display = 'table'; 
+                document.getElementById('studentList').innerHTML = ''; 
+            } catch (error) {
+                console.error("Error loading student data:", error);
+                document.getElementById('studentList').innerHTML = 'Error loading student data'; 
+            }
+        }
+
+        function loadProfessionalData() {
+            document.getElementById('jobOpenings').innerText = '5 available'; 
+            document.getElementById('socialLinks').innerText = 'LinkedIn, Facebook, Instagram'; 
+        }
+
+        window.onload = function() {
+            loadAlumniData();
+            loadFacultyMentors();
+            loadStudentData(); 
+            loadProfessionalData();
+        };
+    </script>
+</body>
+</html>

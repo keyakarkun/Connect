@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #007bff, #ffffff);
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .container {
+            padding: 2rem;
+        }
+
+        .welcome-message {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .student-info, .assignments, .attendance, .feedback, .alumni-community, .calendar-section {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+        }
+
+        .logout-button {
+            margin-top: 2rem;
+            padding: 0.75rem;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        .back-button {
+            position: absolute; 
+            top: 10px;
+            left: 10px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3; 
+        }
+
+        .assignment-upload {
+            margin-top: 1rem;
+        }
+
+        .upload-button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-button:hover {
+            background-color: #0056b3;
+        }
+
+        .chat-button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chat-button:hover {
+            background-color: #218838;
+        }
+
+        .calendar-section {
+            padding: 0;
+            border: none;
+        }
+
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+    </style>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">Back</button>
+
+    <div class="header">
+        <h1>Student Dashboard</h1>
+    </div>
+
+    <div class="container">
+        <div class="welcome-message">
+            Welcome, Student!
+        </div>
+
+        <div class="student-info">
+            <h2>Your Profile</h2>
+            <p><strong>Student ID:</strong> 123456</p>
+            <p><strong>Full Name:</strong> John Doe</p>
+            <p><strong>Program:</strong> B.Tech Computer Science</p>
+            <p><strong>Email:</strong> student@example.com</p>
+        </div>
+
+        <div class="assignments">
+            <h2>Assignments</h2>
+            <p><strong>Math Assignment:</strong> Due on 10th Oct 2024</p>
+            <p><strong>Science Project:</strong> Due on 15th Oct 2024</p>
+            <div class="assignment-upload">
+                <input type="file" id="assignmentFile" />
+                <button class="upload-button" onclick="uploadAssignment()">Upload Assignment</button>
+            </div>
+        </div>
+
+        <div class="attendance">
+            <h2>Attendance</h2>
+            <p><strong>Attendance Percentage:</strong> 85%</p>
+            <p><strong>Last Absent Date:</strong> 5th Sept 2024</p>
+        </div>
+
+        <div class="feedback">
+            <h2>Feedback</h2>
+            <p><strong>Math:</strong> Great improvement this semester!</p>
+            <p><strong>Science:</strong> Needs more participation in class.</p>
+        </div>
+
+        <div class="alumni-community">
+            <h2>Alumni Community</h2>
+            <p>Need help? Ask our alumni about projects, internships, and notes.</p>
+            <button class="chat-button" onclick="joinChat()">Join Alumni Chat</button>
+        </div>
+
+        <div class="calendar-section">
+            <h2>Calendar</h2>
+            <div id="calendar"></div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    {
+                        title: 'Math Exam',
+                        start: '2024-10-10'
+                    },
+                    {
+                        title: 'Science Project Due',
+                        start: '2024-10-15'
+                    },
+                    {
+                        title: 'Holiday: Diwali',
+                        start: '2024-11-04'
+                    },
+                    {
+                        title: 'Annual Sports Day',
+                        start: '2024-12-01'
+                    }
+                ],
+                editable: true, 
+                selectable: true, 
+                select: function(info) {
+                    var eventTitle = prompt('Enter Event Title:');
+                    if (eventTitle) {
+                        calendar.addEvent({
+                            title: eventTitle,
+                            start: info.startStr,
+                            end: info.endStr
+                        });
+                    }
+                }
+            });
+
+            calendar.render();
+        });
+
+        function goBack() {
+            window.location.href = 'student.html'; 
+        }
+
+        function uploadAssignment() {
+            alert("Assignment uploaded!");
+        }
+
+        function joinChat() {
+            window.location.href = 'alumnichat.html'; 
+        }
+    </script>
+</body>
+</html>

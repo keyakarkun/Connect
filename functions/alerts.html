@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Alerts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance Alerts</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Title</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody id="alerts-container">
+        </tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-4tvmQmC11OsoWAfQlpJwAsa9nQKsn0w",
+            authDomain: "udaan-68610.firebaseapp.com",
+            projectId: "udaan-68610",
+            storageBucket: "udaan-68610.appspot.com",
+            messagingSenderId: "375083836802",
+            appId: "1:375083836802:web:db46de9d3a3e2444461b9b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const displayAlerts = async () => {
+            const alertsRef = collection(db, "alerts");
+            const alertsSnapshot = await getDocs(alertsRef);
+            const alertsContainer = document.getElementById('alerts-container');
+
+            alertsSnapshot.forEach((doc) => {
+                const alert = doc.data();
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${alert.studentName}</td><td>${alert.title}</td><td>${alert.message}</td>`;
+                alertsContainer.appendChild(row);
+            });
+        };
+
+        displayAlerts();
+    </script>
+</body>
+</html>

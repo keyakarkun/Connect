@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Assignments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #007bff, #ffffff);        }
+        h1 {
+            color: #007bff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .upload-section, .search-section, .students-section, .mark-section {
+            margin-bottom: 30px;
+        }
+        .students-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .students-section li {
+            background-color: #f4f4f4;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center; 
+        }
+        .students-section li span {
+            flex: 1; 
+            text-align: left; 
+        }
+        .students-section li a {
+            flex: 0; 
+            margin: 0 10px; 
+            text-align: center; 
+        }
+        .students-section li input[type="checkbox"] {
+            flex: 0; 
+            margin-left: auto; 
+        }
+        .search-section input, .mark-section select, .mark-section input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .students-section input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Assignments</h1>
+        
+        <div class="upload-section">
+            <h2>Upload New Assignment</h2>
+            <form id="upload-form" enctype="multipart/form-data">
+                <input type="file" id="assignment-file" name="assignment-file" required>
+                <br><br>
+                <input type="submit" value="Upload Assignment">
+            </form>
+        </div>
+
+        <div class="search-section">
+            <h2>Search Students</h2>
+            <input type="text" id="search-bar" placeholder="Search by student name...">
+        </div>
+
+        <div class="mark-section">
+            <h2>Mark Assignment Submission</h2>
+            <label for="lecture">Select Lecture:</label>
+            <select id="lecture" name="lecture" required>
+                <option value="">--Select Lecture--</option>
+                <option value="Lecture 1">Lecture 1</option>
+                <option value="Lecture 2">Lecture 2</option>
+                <option value="Lecture 3">Lecture 3</option>
+            </select>
+            <br><br>
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required>
+        </div>
+
+        <div class="students-section">
+            <h2>Uploaded Assignments by Students</h2>
+            <ul id="students-list">
+                <li>
+                    <span>John Doe</span> 
+                    <a href="#">Download</a>
+                    <input type="checkbox" id="john-doe-mark" name="submitted">
+                </li>
+                <li>
+                    <span>Jane Smith</span> 
+                    <a href="#">Download</a>
+                    <input type="checkbox" id="jane-smith-mark" name="submitted">
+                </li>
+                <li>
+                    <span>Emily Johnson</span> 
+                    <a href="#">Download</a>
+                    <input type="checkbox" id="emily-johnson-mark" name="submitted">
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const students = [
+            { name: 'John Doe', link: '#' },
+            { name: 'Jane Smith', link: '#' },
+            { name: 'Emily Johnson', link: '#' },
+            { name: 'Alice Brown', link: '#' },
+            { name: 'Charlie Davis', link: '#' }
+        ];
+
+        const searchBar = document.getElementById('search-bar');
+        const studentsList = document.getElementById('students-list');
+
+        searchBar.addEventListener('keyup', function() {
+            const searchValue = searchBar.value.toLowerCase();
+            studentsList.innerHTML = ''; // Clear current list
+
+            const filteredStudents = students.filter(student => 
+                student.name.toLowerCase().includes(searchValue)
+            );
+
+            filteredStudents.forEach(student => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${student.name}</span> 
+                                <a href="${student.link}">Download</a>
+                                <input type="checkbox" id="${student.name}-mark" name="submitted">
+                                <label for="${student.name}-mark">Submitted</label>`;
+                studentsList.appendChild(li);
+            });
+        });
+
+        const uploadForm = document.getElementById('upload-form');
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('assignment-file');
+            const lecture = document.getElementById('lecture').value;
+            const date = document.getElementById('date').value;
+
+            if (fileInput.files.length > 0 && lecture && date) {
+                const fileName = fileInput.files[0].name;
+                const studentName = "John Doe"; 
+
+                database.ref('submissions/' + studentName).set({
+                    lecture: lecture,
+                    date: date,
+                    fileName: fileName,
+                    submitted: true
+                }).then(() => {
+                    alert('Assignment uploaded successfully!');
+                }).catch(error => {
+                    console.error('Error uploading assignment:', error);
+                });
+
+                fileInput.value = '';
+            } else {
+                alert('Please select a file, lecture, and date to upload.');
+            }
+        });
+
+        const studentsListCheckbox = document.querySelectorAll('input[name="submitted"]');
+        studentsListCheckbox.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const studentName = this.id.split('-mark')[0];
+                const isSubmitted = this.checked;
+                const lecture = document.getElementById('lecture').value;
+                const date = document.getElementById('date').value;
+
+                if (lecture && date) {
+                    database.ref('submissions/' + studentName).update({
+                        lecture: lecture,
+                        date: date,
+                        submitted: isSubmitted
+                    }).then(() => {
+                        alert(`${studentName} has ${isSubmitted ? 'submitted' : 'not submitted'} the assignment.`); // Corrected string interpolation
+                    }).catch(error => {
+                        console.error('Error updating submission status:', error);
+                    });
+                } else {
+                    alert('Please select a lecture and date.');
+                    this.checked = false; 
+                }
+            });
+        });
+
+        function loadSubmissions() {
+            const lecture = document.getElementById('lecture').value;
+            const date = document.getElementById('date').value;
+
+            if (lecture && date) {
+                database.ref('submissions').once('value', function(snapshot) {
+                    const submissions = snapshot.val();
+                    studentsList.innerHTML = ''; 
+
+                    for (let student in submissions) {
+                        if (submissions[student].lecture === lecture && submissions[student].date === date) {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span>${student}</span> 
+                                            <a href="#">Download</a>
+                                            <input type="checkbox" ${submissions[student].submitted ? 'checked' : ''} id="${student}-mark" name="submitted">
+                                            <label for="${student}-mark">Submitted</label>`;
+                            studentsList.appendChild(li);
+                        }
+                    }
+                });
+            } else {
+                alert('Please select a lecture and date to view submissions.');
+            }
+        }
+
+        document.getElementById('lecture').addEventListener('change', loadSubmissions);
+        document.getElementById('date').addEventListener('change', loadSubmissions);
+    </script>
+</body>
+</html>

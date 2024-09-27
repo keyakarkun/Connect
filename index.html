@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #007bff, #ffffff);
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .user-type-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .user-type-selector button {
+            background-color: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        .user-type-selector button:hover {
+            background-color: #e0e0e0;
+            color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .user-type-selector button.active {
+            background-color: #007bff;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        button[type="submit"] {
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .forgot-password-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .forgot-password-link:hover {
+            text-decoration: underline;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: none;
+            color: black;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .back-button:hover {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>LOGIN</h1>
+        <div class="user-type-selector">
+            <button type="button" class="user-type" data-type="student">Student Login</button>
+            <button type="button" class="user-type" data-type="alumni">Alumni Login</button>
+            <button type="button" class="user-type" data-type="faculty">Faculty Login</button>
+            <button type="button" class="user-type" data-type="admin">Admin Login</button>
+        </div>
+    </div>
+
+    <script>
+        const userTypeButtons = document.querySelectorAll('.user-type');
+
+        userTypeButtons.forEach((button, index) => {
+            button.style.animationDelay = `${index * 0.1}s`;
+            button.style.animation = 'slideIn 0.5s ease-out forwards';
+            
+            button.addEventListener('click', () => {
+                userTypeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                if (button.dataset.type === 'student') {
+                    window.location.href = 'stud_log.html';
+                } else if (button.dataset.type === 'alumni') {
+                    window.location.href = 'alumni_log.html';
+                } else if (button.dataset.type === 'faculty') {
+                    window.location.href = 'faculty_log.html';
+                } else if (button.dataset.type === 'admin') {
+                    window.location.href = 'admin_log.html';
+                }
+                
+                console.log('Selected user type:', button.dataset.type);
+            });
+        });
+
+        const backButton = document.getElementById('backButton');
+        backButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            window.location.href = 'stud_log.html';
+        });
+    </script>
+</body>
+</html>

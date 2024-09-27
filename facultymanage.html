@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Data Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #007bff, #ffffff);        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Manage Faculty Data</h1>
+
+        <div class="form-group">
+            <label for="facultyId">Faculty ID</label>
+            <input type="text" id="facultyId" placeholder="Enter faculty ID">
+        </div>
+
+        <div class="form-group">
+            <label for="facultyName">Faculty Name</label>
+            <input type="text" id="facultyName" placeholder="Enter faculty name">
+        </div>
+
+        <div class="form-group">
+            <label for="facultySubject">Subject</label>
+            <input type="text" id="facultySubject" placeholder="Enter subject">
+        </div>
+
+        <div class="form-group">
+            <label for="facultyAllocation">Allocation (Year)</label>
+            <input type="text" id="facultyAllocation" placeholder="Enter allocation year">
+        </div>
+
+        <div class="form-group">
+            <label for="searchFacultyId">Search by Faculty ID</label>
+            <input type="text" id="searchFacultyId" placeholder="Enter faculty ID to search">
+        </div>
+
+        <div class="actions">
+            <button id="addFacultyButton" onclick="addFaculty()">Add Faculty</button> 
+            <span id="loadingIndicator" style="display:none;">Loading...</span> 
+            <button onclick="updateFaculty()">Update Faculty</button>
+            <button onclick="deleteFaculty()">Delete Faculty</button>
+            <button onclick="searchFaculty()">Search Faculty</button>
+        </div>
+
+        <table id="facultyTable">
+            <thead>
+                <tr>
+                    <th>Faculty ID</th>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Allocation</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-4tvmQmC11OsoWAfQlpJwAsa9nQKsn0w",
+            authDomain: "udaan-68610.firebaseapp.com",
+            projectId: "udaan-68610",
+            storageBucket: "udaan-68610.appspot.com",
+            messagingSenderId: "375083836802",
+            appId: "1:375083836802:web:db46de9d3a3e2444461b9b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function addFaculty() {
+            const facultyId = document.getElementById('facultyId').value;
+            const name = document.getElementById('facultyName').value;
+            const subject = document.getElementById('facultySubject').value;
+            const allocation = document.getElementById('facultyAllocation').value;
+
+            document.getElementById('addFacultyButton').disabled = true;
+
+            addDoc(collection(db, 'faculty'), {
+                facultyId: facultyId,
+                name: name,
+                subject: subject,
+                allocation: allocation
+            })
+            .then(() => {
+                alert('Faculty saved successfully!');
+                loadFacultyData();
+            })
+            .catch((error) => {
+                console.error("Error saving document: ", error);
+                alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
+                document.getElementById('addFacultyButton').disabled = false;
+            });
+        }
+
+        function updateFaculty() {
+            const facultyId = document.getElementById('facultyId').value;
+            const name = document.getElementById('facultyName').value; 
+            const subject = document.getElementById('facultySubject').value;
+            const allocation = document.getElementById('facultyAllocation').value;
+
+            const facultyRef = query(collection(db, "faculty"), where("facultyId", "==", facultyId));
+
+            getDocs(facultyRef).then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    alert("No faculty found with the given ID.");
+                    return;
+                }
+
+                const docRef = querySnapshot.docs[0].ref;
+
+                updateDoc(docRef, {
+                    name: name, 
+                    subject: subject,
+                    allocation: allocation
+                })
+                .then(() => {
+                    alert("Faculty updated successfully");
+                    loadFacultyData();
+                })
+                .catch((error) => {
+                    console.error("Error updating faculty:", error);
+                    alert('An error occurred while updating the faculty. Please try again.');
+                });
+            });
+        }
+
+        function deleteFaculty() {
+            const facultyId = document.getElementById('facultyId').value;
+
+            const facultyRef = query(collection(db, "faculty"), where("facultyId", "==", facultyId));
+
+            getDocs(facultyRef).then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    alert("No faculty found with the given ID.");
+                    return;
+                }
+
+                const docRef = querySnapshot.docs[0].ref;
+
+                deleteDoc(docRef)
+                    .then(() => {
+                        alert("Faculty deleted successfully");
+                        loadFacultyData();
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting faculty:", error);
+                        alert('An error occurred while deleting the faculty. Please try again.');
+                    });
+            }).catch((error) => {
+                console.error("Error finding faculty:", error); 
+            });
+        }
+
+        function searchFaculty() {
+            const searchId = document.getElementById('searchFacultyId').value;
+
+            const facultyRef = query(collection(db, "faculty"), where("facultyId", "==", searchId));
+
+            getDocs(facultyRef).then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    alert("No faculty found with the given ID.");
+                    return;
+                }
+
+                const tableBody = document.getElementById("facultyTable").getElementsByTagName("tbody")[0];
+                tableBody.innerHTML = "";
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = data.facultyId;
+                    row.insertCell(1).textContent = data.name;
+                    row.insertCell(2).textContent = data.subject;
+                    row.insertCell(3).textContent = data.allocation;
+                });
+            }).catch((error) => {
+                console.error("Error searching faculty data:", error);
+            });
+        }
+
+        function loadFacultyData() {
+            const tableBody = document.getElementById("facultyTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = "";
+
+            const facultyCollection = collection(db, "faculty");
+            getDocs(facultyCollection).then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = data.facultyId;
+                    row.insertCell(1).textContent = data.name;
+                    row.insertCell(2).textContent = data.subject;
+                    row.insertCell(3).textContent = data.allocation;
+                });
+            }).catch((error) => {
+                console.error("Error loading faculty data:", error);
+            });
+        }
+
+        window.addFaculty = addFaculty;
+        window.updateFaculty = updateFaculty;
+        window.deleteFaculty = deleteFaculty;
+        window.searchFaculty = searchFaculty; 
+        window.onload = loadFacultyData; 
+    </script>
+</body>
+</html>
